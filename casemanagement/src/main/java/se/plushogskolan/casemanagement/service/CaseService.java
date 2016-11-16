@@ -196,6 +196,14 @@ public class CaseService {
 		}
 	}
 
+	public Slice<User> getAllUsers(Pageable pageable) {
+		try {
+			return userRepository.findAll(pageable);
+		} catch (DataAccessException e) {
+			throw new ServiceException("Couldnt get all users", e);
+		}
+	}
+
 	// // TEAM
 
 	public Team save(Team team) {
@@ -210,7 +218,7 @@ public class CaseService {
 		}
 	}
 
-//	@Transactional TODO should be tested
+	// @Transactional TODO should be tested
 	public Team updateTeam(Long teamId, Team newValues) {
 		if (teamRepository.exists(teamId)) {
 			try {
@@ -225,7 +233,7 @@ public class CaseService {
 		}
 	}
 
-//	@Transactional TODO should be tested
+	// @Transactional TODO should be tested
 	public Team inactivateTeam(Long teamId) {
 		Team team = teamRepository.findOne(teamId);
 		if (team.isActive() == true) {
@@ -309,7 +317,7 @@ public class CaseService {
 	}
 
 	public WorkItem updateStatusById(Long workItemId, WorkItem.Status workItemStatus) {
-		if(workItemRepository.exists(workItemId)) {
+		if (workItemRepository.exists(workItemId)) {
 			try {
 				WorkItem workItem = workItemRepository.findOne(workItemId);
 				workItem.setStatus(workItemStatus);
@@ -317,8 +325,7 @@ public class CaseService {
 			} catch (DataAccessException e) {
 				throw new ServiceException("This WorkItem could not be updated", e);
 			}
-		}
-		else
+		} else
 			throw new ServiceException("This WorkItem does not exist");
 	}
 
@@ -386,6 +393,15 @@ public class CaseService {
 			return workItemRepository.getWorkItemsWithIssue(pageable);
 		} catch (DataAccessException e) {
 			throw new ServiceException("Could not get WorkItems with Issues", e);
+		}
+	}
+
+	public Slice<WorkItem> getAllWorkItems(Pageable pageable) {
+
+		try {
+			return workItemRepository.findAll(pageable);
+		} catch (DataAccessException e) {
+			throw new ServiceException("Couldnt get all workitems", e);
 		}
 	}
 
