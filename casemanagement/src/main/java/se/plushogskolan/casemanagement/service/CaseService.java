@@ -279,9 +279,9 @@ public class CaseService {
 		}
 	}
 
-	public Slice<Team> getAllTeams(PageRequest pageRequest) {
+	public Slice<Team> getAllTeams(Pageable pageable) {
 		try {
-			return teamRepository.findAll(pageRequest);
+			return teamRepository.findAll(pageable);
 		} catch (DataAccessException e) {
 			throw new ServiceException("Could not get teams");
 		}
@@ -447,9 +447,9 @@ public class CaseService {
 		}
 	}
 
-	public Slice<Issue> getAllIssues(PageRequest pageRequest) {
+	public Slice<Issue> getAllIssues(Pageable pageable) {
 		try {
-			return issueRepository.findAll(pageRequest);
+			return issueRepository.findAll(pageable);
 		} catch (DataAccessException e) {
 			throw new ServiceException("Could not get issues");
 		}
