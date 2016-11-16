@@ -218,7 +218,6 @@ public class CaseService {
 		}
 	}
 
-	// @Transactional TODO should be tested
 	public Team updateTeam(Long teamId, Team newValues) {
 		if (teamRepository.exists(teamId)) {
 			try {
@@ -233,7 +232,6 @@ public class CaseService {
 		}
 	}
 
-	// @Transactional TODO should be tested
 	public Team inactivateTeam(Long teamId) {
 		Team team = teamRepository.findOne(teamId);
 		if (team.isActive() == true) {
@@ -248,7 +246,6 @@ public class CaseService {
 		}
 	}
 
-	@Transactional
 	public Team activateTeam(Long teamId) {
 		try {
 			Team team = teamRepository.findOne(teamId);
@@ -287,15 +284,14 @@ public class CaseService {
 		}
 	}
 
-	@Transactional
-	public void addUserToTeam(Long userId, Long teamId) {
+	public Team addUserToTeam(Long userId, Long teamId) {
 		try {
 			if (teamHasSpaceForUser(teamId)) {
 				Team team = teamRepository.findOne(teamId);
 				User user = userRepository.findOne(userId);
 				team.addUser(user);
-				teamRepository.save(team);
-				// Has several possible exceptions probably
+				return teamRepository.save(team);
+				
 			} else {
 				throw new ServiceException("No space in team for user. userId = " + userId + "teamId = " + teamId);
 			}
@@ -342,7 +338,7 @@ public class CaseService {
 
 	public WorkItem addWorkItemToUser(Long workItemId, Long userId) {
 		// PageRequest(0, 5) because if page 0 has 5 entries the method will
-		// throw a ServiceException as desired
+		
 		if (userIsActive(userId) && userHasSpaceForAdditionalWorkItem(workItemId, userId, new PageRequest(0, 5))) {
 			try {
 				WorkItem workItem = workItemRepository.findOne(workItemId);
@@ -424,7 +420,6 @@ public class CaseService {
 		}
 	}
 
-	@Transactional
 	public Issue updateIssueDescription(Long issueId, String description) {
 		if (issueRepository.exists(issueId)) {
 			try {
