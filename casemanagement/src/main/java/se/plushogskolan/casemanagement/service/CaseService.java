@@ -1,9 +1,15 @@
 package se.plushogskolan.casemanagement.service;
 
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -398,6 +404,14 @@ public class CaseService {
 			return workItemRepository.findAll(pageable);
 		} catch (DataAccessException e) {
 			throw new ServiceException("Couldnt get all workitems", e);
+		}
+	}
+	
+	public Page<WorkItem> getWorkItemsByPeriodAndStatus(WorkItem.Status status, Date start, Date end, Pageable pageable){
+		try{
+			return workItemRepository.getWorkItemsByStatusAndPeriod(status, start, end, pageable);
+		}catch (DataAccessException e) {
+			throw new ServiceException("", e);
 		}
 	}
 

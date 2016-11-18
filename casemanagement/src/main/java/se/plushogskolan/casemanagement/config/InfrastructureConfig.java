@@ -32,11 +32,11 @@ public class InfrastructureConfig {
 	public DataSource dataSource() {
 
 		HikariConfig config = new HikariConfig();
-		config.setDriverClassName("com.mysql.jdbc.Driver");
-		config.setJdbcUrl("jdbc:mysql://localhost:3306/springdb");
+		config.setDriverClassName(readProperty("driver"));
+		config.setJdbcUrl(readProperty("url"));
 		config.setUsername(readProperty("username"));
 		config.setPassword(readProperty("password"));
-
+		
 		return new HikariDataSource(config);
 	}
 
