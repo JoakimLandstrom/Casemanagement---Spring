@@ -1,8 +1,6 @@
 package se.plushogskolan.casemanagement.service;
 
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.transaction.Transactional;
@@ -209,6 +207,23 @@ public class CaseService {
 			throw new ServiceException("Couldnt get all users", e);
 		}
 	}
+	
+	@Transactional
+	public User addUserToTeam(Long userId, Long teamId) {
+		try {
+			if (teamHasSpaceForUser(teamId)) {
+				Team team = teamRepository.findOne(teamId);
+				User user = userRepository.findOne(userId);
+				user.setTeam(team);
+				return userRepository.save(user);
+				
+			} else {
+				throw new ServiceException("No space in team for user. userId = " + userId + "teamId = " + teamId);
+			}
+		} catch (DataAccessException e) {
+			throw new ServiceException("User could not be added to Team");
+		}
+	}
 
 	// // TEAM
 
@@ -290,22 +305,6 @@ public class CaseService {
 		}
 	}
 
-	public Team addUserToTeam(Long userId, Long teamId) {
-		try {
-			if (teamHasSpaceForUser(teamId)) {
-				Team team = teamRepository.findOne(teamId);
-				User user = userRepository.findOne(userId);
-				team.addUser(user);
-				return teamRepository.save(team);
-				
-			} else {
-				throw new ServiceException("No space in team for user. userId = " + userId + "teamId = " + teamId);
-			}
-		} catch (DataAccessException e) {
-			throw new ServiceException("User could not be added to Team");
-		}
-	}
-
 	// WORKITEM
 
 	public WorkItem save(WorkItem workItem) {
@@ -342,6 +341,7 @@ public class CaseService {
 			throw new ServiceException("This WorkItem does not exist");
 	}
 
+	@Transactional
 	public WorkItem addWorkItemToUser(Long workItemId, Long userId) {
 		// PageRequest(0, 5) because if page 0 has 5 entries the method will
 		
@@ -480,7 +480,7 @@ public class CaseService {
 	}
 
 	private boolean teamHasSpaceForUser(Long teamId) {
-
+		
 		return userRepository.countByTeamId(teamId) < 10;
 	}
 
@@ -512,7 +512,7 @@ public class CaseService {
 				return true;
 			}
 		}
-		if (workItems.getSize() < 5)
+		if (workItems.getNumberOfElements() < 5)
 			return true;
 		else
 			return false;
