@@ -1,10 +1,14 @@
 package se.plushogskolan.casemanagement.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -16,6 +20,7 @@ import se.plushogskolan.casemanagement.config.InfrastructureConfig;
 import se.plushogskolan.casemanagement.exception.ServiceException;
 import se.plushogskolan.casemanagement.model.Team;
 import se.plushogskolan.casemanagement.model.User;
+import se.plushogskolan.casemanagement.repository.UserRepository;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { InfrastructureConfig.class,
@@ -212,22 +217,46 @@ public class CaseServiceUser {
 	@Test
 	public void getUsersByTeam() {
 		Team team = new Team("userteam");
-		User user = new User("joakimlandstrom8");
+		User savedUser = new User("joakimlandstrom8");
 
 		service.save(team);
-		service.save(user);
+		service.save(savedUser);
 
-		service.addUserToTeam(user.getId(), team.getId());
-
-		// Slice<User> users = service.getUsersByTeam(team.getId(), new
-		// PageRequest(0, 5));
-
-		Slice<User> users = service.getAllUsers(new PageRequest(0, 100));
-
-		for (User user2 : users) {
-			System.out.println(user2.getUsername() + " " + user2.getTeam());
-		}
-
+		service.addUserToTeam(savedUser.getId(), team.getId());
+		
+		Slice<User> users = service.getUsersByTeam(team.getId(), new PageRequest(0, 5));
+		
+		assertEquals(savedUser, users.getContent().get(0));
 	}
+	
+	@Test
+	public void getAllUsers(){
+		
+		Slice<User> users = service.getAllUsers(new PageRequest(0, 20));
+		
+		assertTrue(users.getContent().size()>10);		
+	}
+	
+	@Test(expected = ServiceException.class)
+	public void addUserToTeamShouldThrowExceptionWhenTeamIsFull(){
+		
+		Team team = new Team("userteam2");
+		
+		service.save(team);
+		
+		for(int i = 1; i <= 10; i++){
+			
+			User user = service.save(new User("teamfilleruser" + i));
+			
+			service.addUserToTeam(user.getId(),team.getId());
+		}
+		
+		User testUser = new User("maybeteamisfull");
+		
+		service.save(testUser);
+		
+		service.addUserToTeam(testUser.getId(), team.getId());
+	}
+
 
 }
