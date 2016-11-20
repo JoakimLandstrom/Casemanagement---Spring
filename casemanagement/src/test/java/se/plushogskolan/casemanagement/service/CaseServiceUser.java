@@ -60,14 +60,6 @@ public class CaseServiceUser {
 		service.save(user);
 	}
 
-	// @Test(expected = ServiceException.class)
-	// public void shouldThrowExcetpionWhenTeamIsFull() {
-	//
-	// User user = new User("joakimlandstrom").setTeam(new Team("team 1"));
-	//
-	//
-	// }
-
 	@Test(expected = ServiceException.class)
 	public void saveUserShouldThrowExceptionIfPersisted() {
 
