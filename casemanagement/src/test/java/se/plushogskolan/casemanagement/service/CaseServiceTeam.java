@@ -56,7 +56,6 @@ public class CaseServiceTeam {
 		service.save(team);
 
 		service.save(team);
-
 	}
 
 	@Test
@@ -114,9 +113,9 @@ public class CaseServiceTeam {
 	}
 
 	@Test
-	public void searchTeamyName() {
+	public void searchTeamByName() {
 		
-		Slice<Team> teams = service.searchTeamByName("new tema", new PageRequest(0, 10));
+		Slice<Team> teams = service.searchTeamByName("new team", new PageRequest(0, 10));
 		
 		assertTrue(teams.getNumberOfElements() >= 5);
 	}

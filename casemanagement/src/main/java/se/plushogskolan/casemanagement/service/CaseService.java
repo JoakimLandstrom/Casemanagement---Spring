@@ -1,6 +1,5 @@
 package se.plushogskolan.casemanagement.service;
 
-
 import java.util.Date;
 
 import javax.transaction.Transactional;
@@ -207,7 +206,7 @@ public class CaseService {
 			throw new ServiceException("Couldnt get all users", e);
 		}
 	}
-	
+
 	@Transactional
 	public User addUserToTeam(Long userId, Long teamId) {
 		try {
@@ -216,7 +215,7 @@ public class CaseService {
 				User user = userRepository.findOne(userId);
 				user.setTeam(team);
 				return userRepository.save(user);
-				
+
 			} else {
 				throw new ServiceException("No space in team for user. userId = " + userId + "teamId = " + teamId);
 			}
@@ -344,7 +343,7 @@ public class CaseService {
 	@Transactional
 	public WorkItem addWorkItemToUser(Long workItemId, Long userId) {
 		// PageRequest(0, 5) because if page 0 has 5 entries the method will
-		
+
 		if (userIsActive(userId) && userHasSpaceForAdditionalWorkItem(workItemId, userId, new PageRequest(0, 5))) {
 			try {
 				WorkItem workItem = workItemRepository.findOne(workItemId);
@@ -406,11 +405,12 @@ public class CaseService {
 			throw new ServiceException("Couldnt get all workitems", e);
 		}
 	}
-	
-	public Page<WorkItem> getWorkItemsByPeriodAndStatus(WorkItem.Status status, Date start, Date end, Pageable pageable){
-		try{
+
+	public Page<WorkItem> getWorkItemsByPeriodAndStatus(WorkItem.Status status, Date start, Date end,
+			Pageable pageable) {
+		try {
 			return workItemRepository.getWorkItemsByStatusAndPeriod(status, start, end, pageable);
-		}catch (DataAccessException e) {
+		} catch (DataAccessException e) {
 			throw new ServiceException("", e);
 		}
 	}
@@ -419,18 +419,19 @@ public class CaseService {
 
 	@Transactional
 	public Issue save(Issue issue) {
-		if (workItemIsDone(issue.getWorkitem().getId())) {
+		if (workItemIsDone(issue.getWorkitem().getId()) && !isPersistedObject(issue)) {
 			try {
 				issueRepository.save(issue);
 				WorkItem workItem = workItemRepository.findOne(issue.getWorkitem().getId());
-				workItem.setIssue(issue).setStatus(Status.UNSTARTED);
+				workItem.setIssue(issue).setStatus(WorkItem.Status.UNSTARTED);
+				issue.setWorkItem(workItem);
 				workItemRepository.save(workItem);
 				return issue;
 			} catch (DataAccessException e) {
 				throw new ServiceException("Issue could not be saved");
 			}
 		} else {
-			throw new ServiceException("WorkItem does not have status done");
+			throw new ServiceException("WorkItem does not have status done or the Issue already exists");
 		}
 	}
 
@@ -480,7 +481,7 @@ public class CaseService {
 	}
 
 	private boolean teamHasSpaceForUser(Long teamId) {
-		
+
 		return userRepository.countByTeamId(teamId) < 10;
 	}
 
