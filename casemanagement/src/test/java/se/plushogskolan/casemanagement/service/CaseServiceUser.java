@@ -51,6 +51,26 @@ public class CaseServiceUser {
 		assertEquals(user, returnedUser);
 
 	}
+	
+	@Test(expected = ServiceException.class)
+	public void saveUserShouldThrowExceptionIfTeamIsFull(){
+		
+		User user = new User("userjoinfullteam");
+		
+		Team team = new Team("fullteam");
+		
+		service.save(team);
+		
+		for(int i = 1; i <= 10; i++){
+			User newUser = service.save(new User("joinedfullteam" + i));
+			
+			service.addUserToTeam(newUser.getId(), team.getId());
+		}
+		
+		user.setTeam(team);
+		
+		service.save(user);
+	}
 
 	@Test(expected = ServiceException.class)
 	public void saveUserShouldThrowExceptionWhenUsernameNotLongEnough() {
@@ -245,8 +265,4 @@ public class CaseServiceUser {
 		
 		service.addUserToTeam(testUser.getId(), team.getId());
 	}
-
-	
-	
-
 }
