@@ -19,7 +19,7 @@ public class User extends AbstractEntity {
 	@OneToMany(mappedBy = "user")
 	private Collection<WorkItem> workItems;
 
-	private boolean isActive;
+	private boolean isActive = true;
 
 	private String firstName = "";
 

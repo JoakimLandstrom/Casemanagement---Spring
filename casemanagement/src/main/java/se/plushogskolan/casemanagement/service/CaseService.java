@@ -6,7 +6,6 @@ import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -18,7 +17,6 @@ import se.plushogskolan.casemanagement.model.Issue;
 import se.plushogskolan.casemanagement.model.Team;
 import se.plushogskolan.casemanagement.model.User;
 import se.plushogskolan.casemanagement.model.WorkItem;
-import se.plushogskolan.casemanagement.model.WorkItem.Status;
 import se.plushogskolan.casemanagement.repository.IssueRepository;
 import se.plushogskolan.casemanagement.repository.TeamRepository;
 import se.plushogskolan.casemanagement.repository.UserRepository;
@@ -406,7 +404,7 @@ public class CaseService {
 		}
 	}
 
-	public Page<WorkItem> getWorkItemsByPeriodAndStatus(WorkItem.Status status, Date start, Date end,
+	public Slice<WorkItem> getWorkItemsByPeriodAndStatus(WorkItem.Status status, Date start, Date end,
 			Pageable pageable) {
 		try {
 			return workItemRepository.getWorkItemsByStatusAndPeriod(status, start, end, pageable);

@@ -25,7 +25,7 @@ public interface WorkItemRepository extends PagingAndSortingRepository<WorkItem,
 	Slice<WorkItem> getWorkItemsWithIssue(Pageable pageable);
 
 	@Query("SELECT wi FROM #{#entityName} wi WHERE wi.status = :status AND wi.lastModifiedDate BETWEEN :startDate AND :endDate")
-	Page<WorkItem> getWorkItemsByStatusAndPeriod(@Param("status") WorkItem.Status status, @Param("startDate") Date startDate, @Param("endDate") Date endDate,
+	Slice<WorkItem> getWorkItemsByStatusAndPeriod(@Param("status") WorkItem.Status status, @Param("startDate") Date startDate, @Param("endDate") Date endDate,
 			Pageable pageable);
 
 }
