@@ -73,7 +73,7 @@ public class CaseServiceIssue {
 
 		Issue issue = new Issue(workItem, "persisted issue");
 
-		service.save(issue);
+		service.save(issue); 
 
 		service.save(issue);
 

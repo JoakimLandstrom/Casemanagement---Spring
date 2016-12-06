@@ -37,7 +37,7 @@ public class InfrastructureConfig {
 		config.setUsername(readProperty("username"));
 		config.setPassword(readProperty("password"));
 		
-		return new HikariDataSource(config);
+		return new HikariDataSource(config); 
 	}
 
 	@Bean

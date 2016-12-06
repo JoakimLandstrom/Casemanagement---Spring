@@ -33,7 +33,7 @@ public class CaseServiceTeam {
 		if (!dbInit) {
 			for (int i = 1; i <= 5; i++) {
 				Team team = new Team("new team" + i);
-				service.save(team);
+				service.save(team); 
 			}
 		}
 		dbInit = true;
