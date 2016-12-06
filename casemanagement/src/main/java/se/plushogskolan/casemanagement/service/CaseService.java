@@ -1,5 +1,7 @@
 package se.plushogskolan.casemanagement.service;
 
+import java.util.Date;
+
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +17,6 @@ import se.plushogskolan.casemanagement.model.Issue;
 import se.plushogskolan.casemanagement.model.Team;
 import se.plushogskolan.casemanagement.model.User;
 import se.plushogskolan.casemanagement.model.WorkItem;
-import se.plushogskolan.casemanagement.model.WorkItem.Status;
 import se.plushogskolan.casemanagement.repository.IssueRepository;
 import se.plushogskolan.casemanagement.repository.TeamRepository;
 import se.plushogskolan.casemanagement.repository.UserRepository;
@@ -196,6 +197,31 @@ public class CaseService {
 		}
 	}
 
+	public Slice<User> getAllUsers(Pageable pageable) {
+		try {
+			return userRepository.findAll(pageable);
+		} catch (DataAccessException e) {
+			throw new ServiceException("Couldnt get all users", e);
+		}
+	}
+
+	@Transactional
+	public User addUserToTeam(Long userId, Long teamId) {
+		try {
+			if (teamHasSpaceForUser(teamId)) {
+				Team team = teamRepository.findOne(teamId);
+				User user = userRepository.findOne(userId);
+				user.setTeam(team);
+				return userRepository.save(user);
+
+			} else {
+				throw new ServiceException("No space in team for user. userId = " + userId + "teamId = " + teamId);
+			}
+		} catch (DataAccessException e) {
+			throw new ServiceException("User could not be added to Team");
+		}
+	}
+
 	// // TEAM
 
 	public Team save(Team team) {
@@ -276,22 +302,6 @@ public class CaseService {
 		}
 	}
 
-	public Team addUserToTeam(Long userId, Long teamId) {
-		try {
-			if (teamHasSpaceForUser(teamId)) {
-				Team team = teamRepository.findOne(teamId);
-				User user = userRepository.findOne(userId);
-				team.addUser(user);
-				return teamRepository.save(team);
-				
-			} else {
-				throw new ServiceException("No space in team for user. userId = " + userId + "teamId = " + teamId);
-			}
-		} catch (DataAccessException e) {
-			throw new ServiceException("User could not be added to Team");
-		}
-	}
-
 	// WORKITEM
 
 	public WorkItem save(WorkItem workItem) {
@@ -305,7 +315,7 @@ public class CaseService {
 	}
 
 	public WorkItem updateStatusById(Long workItemId, WorkItem.Status workItemStatus) {
-		if(workItemRepository.exists(workItemId)) {
+		if (workItemRepository.exists(workItemId)) {
 			try {
 				WorkItem workItem = workItemRepository.findOne(workItemId);
 				workItem.setStatus(workItemStatus);
@@ -313,8 +323,7 @@ public class CaseService {
 			} catch (DataAccessException e) {
 				throw new ServiceException("This WorkItem could not be updated", e);
 			}
-		}
-		else
+		} else
 			throw new ServiceException("This WorkItem does not exist");
 	}
 
@@ -329,9 +338,10 @@ public class CaseService {
 			throw new ServiceException("This WorkItem does not exist");
 	}
 
+	@Transactional
 	public WorkItem addWorkItemToUser(Long workItemId, Long userId) {
 		// PageRequest(0, 5) because if page 0 has 5 entries the method will
-		
+
 		if (userIsActive(userId) && userHasSpaceForAdditionalWorkItem(workItemId, userId, new PageRequest(0, 5))) {
 			try {
 				WorkItem workItem = workItemRepository.findOne(workItemId);
@@ -385,22 +395,41 @@ public class CaseService {
 		}
 	}
 
+	public Slice<WorkItem> getAllWorkItems(Pageable pageable) {
+
+		try {
+			return workItemRepository.findAll(pageable);
+		} catch (DataAccessException e) {
+			throw new ServiceException("Couldnt get all workitems", e);
+		}
+	}
+
+	public Slice<WorkItem> getWorkItemsByPeriodAndStatus(WorkItem.Status status, Date start, Date end,
+			Pageable pageable) {
+		try {
+			return workItemRepository.getWorkItemsByStatusAndPeriod(status, start, end, pageable);
+		} catch (DataAccessException e) {
+			throw new ServiceException("", e);
+		}
+	}
+
 	// ISSUE
 
 	@Transactional
 	public Issue save(Issue issue) {
-		if (workItemIsDone(issue.getWorkitem().getId())) {
+		if (workItemIsDone(issue.getWorkitem().getId()) && !isPersistedObject(issue)) {
 			try {
 				issueRepository.save(issue);
 				WorkItem workItem = workItemRepository.findOne(issue.getWorkitem().getId());
-				workItem.setIssue(issue).setStatus(Status.UNSTARTED);
+				workItem.setIssue(issue).setStatus(WorkItem.Status.UNSTARTED);
+				issue.setWorkItem(workItem);
 				workItemRepository.save(workItem);
 				return issue;
 			} catch (DataAccessException e) {
 				throw new ServiceException("Issue could not be saved");
 			}
 		} else {
-			throw new ServiceException("WorkItem does not have status done");
+			throw new ServiceException("WorkItem does not have status done or the Issue already exists");
 		}
 	}
 
@@ -482,7 +511,7 @@ public class CaseService {
 				return true;
 			}
 		}
-		if (workItems.getSize() < 5)
+		if (workItems.getNumberOfElements() < 5)
 			return true;
 		else
 			return false;

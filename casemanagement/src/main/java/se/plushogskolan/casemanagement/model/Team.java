@@ -70,8 +70,4 @@ public final class Team extends AbstractEntity {
 	public Collection<User> getUsers() {
 		return users;
 	}
-	
-	public void addUser(User user){
-		users.add(user);
-	}
 }

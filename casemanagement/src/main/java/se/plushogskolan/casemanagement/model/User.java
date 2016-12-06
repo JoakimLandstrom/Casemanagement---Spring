@@ -17,7 +17,7 @@ public class User extends AbstractEntity {
 	private Team team;
 
 	@OneToMany(mappedBy = "user")
-	private Collection<WorkItem> workItems = null;
+	private Collection<WorkItem> workItems;
 
 	private boolean isActive = true;
 
@@ -27,6 +27,7 @@ public class User extends AbstractEntity {
 
 	public User(String username) {
 		this.username = username;
+		this.team = null;
 	}
 
 	protected User() {
@@ -67,7 +68,7 @@ public class User extends AbstractEntity {
 		return team;
 	}
 
-	public Collection<WorkItem> getWorkItem() {
+	public Collection<WorkItem> getWorkItems() {
 		return workItems;
 	}
 
@@ -105,11 +106,6 @@ public class User extends AbstractEntity {
 
 	public User setActive(boolean isActive) {
 		this.isActive = isActive;
-		return this;
-	}
-
-	public User setWorkItems(Collection<WorkItem> workItems) {
-		this.workItems = workItems;
 		return this;
 	}
 
