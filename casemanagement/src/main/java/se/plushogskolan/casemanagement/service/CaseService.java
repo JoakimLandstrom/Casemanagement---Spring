@@ -11,6 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
+import se.plushogskolan.casemanagement.exception.AlreadyPersistedException;
+import se.plushogskolan.casemanagement.exception.IllegalArgumentException;
+import se.plushogskolan.casemanagement.exception.InternalErrorException;
+import se.plushogskolan.casemanagement.exception.NoSpaceException;
 import se.plushogskolan.casemanagement.exception.ServiceException;
 import se.plushogskolan.casemanagement.model.AbstractEntity;
 import se.plushogskolan.casemanagement.model.Issue;
@@ -46,14 +50,14 @@ public class CaseService {
 		if (!userFillsRequirements(user)) {
 			throw new ServiceException("Username is too short or team is full");
 		}
-		if (isPersistedObject(user)) {
-			throw new ServiceException(String.format("User with id: %d already exists", user.getId()));
+		if (isPersistedObject(user) && !userFillsRequirements(user)) {
+			throw new AlreadyPersistedException(String.format("User with id: %d already exists", user.getId()));
 		}
 
 		try {
 			return userRepository.save(user);
 		} catch (DataAccessException e) {
-			throw new ServiceException("User could not be saved : " + user.getUsername(), e);
+			throw new InternalErrorException("User could not be saved : " + user.getUsername(), e);
 		}
 	}
 
@@ -465,10 +469,10 @@ public class CaseService {
 
 	private boolean userFillsRequirements(User user) {
 		if (!usernameLongEnough(user.getUsername())) {
-			return false;
+			throw new IllegalArgumentException("Username to short");
 		}
 		if (user.getTeam() != null && !teamHasSpaceForUser(user.getTeam().getId())) {
-			return false;
+			throw new NoSpaceException("Team has no space");
 		}
 		return true;
 	}
