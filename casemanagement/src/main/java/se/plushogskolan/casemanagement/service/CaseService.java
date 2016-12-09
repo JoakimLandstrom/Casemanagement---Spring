@@ -15,7 +15,9 @@ import se.plushogskolan.casemanagement.exception.AlreadyPersistedException;
 import se.plushogskolan.casemanagement.exception.IllegalArgumentException;
 import se.plushogskolan.casemanagement.exception.InternalErrorException;
 import se.plushogskolan.casemanagement.exception.NoSpaceException;
+import se.plushogskolan.casemanagement.exception.NotPersistedException;
 import se.plushogskolan.casemanagement.exception.ServiceException;
+import se.plushogskolan.casemanagement.exception.StatusConflictException;
 import se.plushogskolan.casemanagement.model.AbstractEntity;
 import se.plushogskolan.casemanagement.model.Issue;
 import se.plushogskolan.casemanagement.model.Team;
@@ -46,10 +48,7 @@ public class CaseService {
 	// USER
 
 	public User save(User user) {
-
-		if (!userFillsRequirements(user)) {
-			throw new ServiceException("Username is too short or team is full");
-		}
+		
 		if (isPersistedObject(user) && !userFillsRequirements(user)) {
 			throw new AlreadyPersistedException(String.format("User with id: %d already exists", user.getId()));
 		}
@@ -71,10 +70,10 @@ public class CaseService {
 				return userRepository.save(user);
 
 			} catch (DataAccessException e) {
-				throw new ServiceException("User could not be updated", e);
+				throw new InternalErrorException("User could not be updated", e);
 			}
 		} else {
-			throw new ServiceException("User does not exist :" + userId);
+			throw new NotPersistedException("User does not exist :" + userId);
 		}
 	}
 
@@ -89,17 +88,17 @@ public class CaseService {
 				return userRepository.save(user);
 
 			} catch (DataAccessException e) {
-				throw new ServiceException("User could not be updated", e);
+				throw new InternalErrorException("User could not be updated", e);
 			}
 		} else {
-			throw new ServiceException("User does not exist :" + userId);
+			throw new NotPersistedException("User does not exist :" + userId);
 		}
 	}
 
 	public User updateUserUsername(Long userId, String username) {
 
 		if (!usernameLongEnough(username)) {
-			throw new ServiceException("Username not long enough!");
+			throw new IllegalArgumentException("Username not long enough!");
 		}
 
 		if (userRepository.exists(userId)) {
@@ -112,10 +111,10 @@ public class CaseService {
 				return userRepository.save(user);
 
 			} catch (DataAccessException e) {
-				throw new ServiceException("User could not be updated", e);
+				throw new InternalErrorException("User could not be updated", e);
 			}
 		} else
-			throw new ServiceException("User could not be updated");
+			throw new NotPersistedException("User doesnt exist");
 	}
 
 	public User inactivateUser(Long userId) {
@@ -133,10 +132,10 @@ public class CaseService {
 				return userRepository.save(user);
 
 			} catch (DataAccessException e) {
-				throw new ServiceException("User could not be updated", e);
+				throw new InternalErrorException("User could not be updated", e);
 			}
 		} else {
-			throw new ServiceException("User does not exists :" + userId);
+			throw new NotPersistedException("User does not exists :" + userId);
 		}
 	}
 
@@ -152,10 +151,10 @@ public class CaseService {
 
 				return userRepository.save(user);
 			} catch (DataAccessException e) {
-				throw new ServiceException("User could not be updated", e);
+				throw new InternalErrorException("User could not be updated", e);
 			}
 		} else {
-			throw new ServiceException("User does not exists :" + userId);
+			throw new NotPersistedException("User does not exists :" + userId);
 		}
 	}
 
@@ -164,7 +163,7 @@ public class CaseService {
 		if (userRepository.exists(userId)) {
 			return userRepository.findOne(userId);
 		} else {
-			throw new ServiceException("User does not exists :" + userId);
+			throw new NotPersistedException("User does not exists :" + userId);
 		}
 
 	}
@@ -173,7 +172,7 @@ public class CaseService {
 		try {
 			return userRepository.findByFirstNameContaining(firstName, page);
 		} catch (DataAccessException e) {
-			throw new ServiceException("Could not search users", e);
+			throw new InternalErrorException("Could not search users", e);
 		}
 	}
 
@@ -181,7 +180,7 @@ public class CaseService {
 		try {
 			return userRepository.findByLastNameContaining(lastName, page);
 		} catch (DataAccessException e) {
-			throw new ServiceException("Could not search users", e);
+			throw new InternalErrorException("Could not search users", e);
 		}
 	}
 
@@ -189,7 +188,7 @@ public class CaseService {
 		try {
 			return userRepository.findByUsernameContaining(username, page);
 		} catch (DataAccessException e) {
-			throw new ServiceException("Could not search users", e);
+			throw new InternalErrorException("Could not search users", e);
 		}
 	}
 
@@ -197,7 +196,7 @@ public class CaseService {
 		try {
 			return userRepository.findByTeamId(teamId, page);
 		} catch (DataAccessException e) {
-			throw new ServiceException("Could not search users", e);
+			throw new InternalErrorException("Could not search users", e);
 		}
 	}
 
@@ -205,7 +204,7 @@ public class CaseService {
 		try {
 			return userRepository.findAll(pageable);
 		} catch (DataAccessException e) {
-			throw new ServiceException("Couldnt get all users", e);
+			throw new InternalErrorException("Couldnt get all users", e);
 		}
 	}
 
@@ -219,10 +218,10 @@ public class CaseService {
 				return userRepository.save(user);
 
 			} else {
-				throw new ServiceException("No space in team for user. userId = " + userId + "teamId = " + teamId);
+				throw new NoSpaceException("No space in team for user. userId = " + userId + "teamId = " + teamId);
 			}
 		} catch (DataAccessException e) {
-			throw new ServiceException("User could not be added to Team");
+			throw new InternalErrorException("User could not be added to Team");
 		}
 	}
 
@@ -233,10 +232,10 @@ public class CaseService {
 			try {
 				return teamRepository.save(team);
 			} catch (DataAccessException e) {
-				throw new ServiceException("Team could not be saved");
+				throw new InternalErrorException("Team could not be saved");
 			}
 		} else {
-			throw new ServiceException("Team already exists");
+			throw new AlreadyPersistedException("Team already exists");
 		}
 	}
 
@@ -247,10 +246,10 @@ public class CaseService {
 				team.setActive(newValues.isActive()).setName(newValues.getName());
 				return teamRepository.save(team);
 			} catch (DataAccessException e) {
-				throw new ServiceException("Could not update Team");
+				throw new InternalErrorException("Could not update Team");
 			}
 		} else {
-			throw new ServiceException("Team does not exist");
+			throw new NotPersistedException("Team does not exist");
 		}
 	}
 
@@ -261,10 +260,10 @@ public class CaseService {
 				team.setActive(false);
 				return teamRepository.save(team);
 			} catch (DataAccessException e) {
-				throw new ServiceException("Team could not be inactivated");
+				throw new InternalErrorException("Team could not be inactivated");
 			}
 		} else {
-			throw new ServiceException("Team is already inactive");
+			throw new StatusConflictException("Team is already inactive");
 		}
 	}
 
