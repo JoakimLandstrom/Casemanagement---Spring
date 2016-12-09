@@ -1,6 +1,7 @@
 package se.plushogskolan.casemanagement.service;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.transaction.Transactional;
 
@@ -16,7 +17,6 @@ import se.plushogskolan.casemanagement.exception.IllegalArgumentException;
 import se.plushogskolan.casemanagement.exception.InternalErrorException;
 import se.plushogskolan.casemanagement.exception.NoSpaceException;
 import se.plushogskolan.casemanagement.exception.NotPersistedException;
-import se.plushogskolan.casemanagement.exception.ServiceException;
 import se.plushogskolan.casemanagement.exception.StatusConflictException;
 import se.plushogskolan.casemanagement.model.AbstractEntity;
 import se.plushogskolan.casemanagement.model.Issue;
@@ -168,41 +168,42 @@ public class CaseService {
 
 	}
 
-	public Slice<User> searchUsersByFirstName(String firstName, Pageable page) {
+	public List<User> searchUsersByFirstName(String firstName, int page, int size) {
 		try {
-			return userRepository.findByFirstNameContaining(firstName, page);
+
+			return userRepository.findByFirstNameContaining(firstName, new PageRequest(page, size)).getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Could not search users", e);
 		}
 	}
 
-	public Slice<User> searchUsersByLastName(String lastName, Pageable page) {
+	public List<User> searchUsersByLastName(String lastName, int page, int size) {
 		try {
-			return userRepository.findByLastNameContaining(lastName, page);
+			return userRepository.findByLastNameContaining(lastName, new PageRequest(page, size)).getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Could not search users", e);
 		}
 	}
 
-	public Slice<User> searchUsersByUsername(String username, Pageable page) {
+	public List<User> searchUsersByUsername(String username, int page, int size) {
 		try {
-			return userRepository.findByUsernameContaining(username, page);
+			return userRepository.findByUsernameContaining(username, new PageRequest(page, size)).getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Could not search users", e);
 		}
 	}
 
-	public Slice<User> getUsersByTeam(Long teamId, Pageable page) {
+	public List<User> getUsersByTeam(Long teamId, int page, int size) {
 		try {
-			return userRepository.findByTeamId(teamId, page);
+			return userRepository.findByTeamId(teamId, new PageRequest(page, size)).getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Could not search users", e);
 		}
 	}
 
-	public Slice<User> getAllUsers(Pageable pageable) {
+	public List<User> getAllUsers(int page, int size) {
 		try {
-			return userRepository.findAll(pageable);
+			return userRepository.findAll(new PageRequest(page, size)).getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Couldnt get all users", e);
 		}
@@ -289,17 +290,17 @@ public class CaseService {
 		}
 	}
 
-	public Slice<Team> searchTeamByName(String name, Pageable page) {
+	public List<Team> searchTeamByName(String name, int page, int size) {
 		try {
-			return teamRepository.findByNameContaining(name, page);
+			return teamRepository.findByNameContaining(name, new PageRequest(page, size)).getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Could not get team with name: " + name);
 		}
 	}
 
-	public Slice<Team> getAllTeams(Pageable pageable) {
+	public List<Team> getAllTeams(int page, int size) {
 		try {
-			return teamRepository.findAll(pageable);
+			return teamRepository.findAll(new PageRequest(page, size)).getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Could not get teams");
 		}
@@ -358,59 +359,59 @@ public class CaseService {
 			throw new StatusConflictException("User is inactive");
 	}
 
-	public Slice<WorkItem> searchWorkItemByDescription(String description, Pageable pageable) {
+	public List<WorkItem> searchWorkItemByDescription(String description, int page, int size) {
 		try {
-			return workItemRepository.findByDescriptionContaining(description, pageable);
+			return workItemRepository.findByDescriptionContaining(description, new PageRequest(page, size)).getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Could not find any WorkItem with description: " + description, e);
 		}
 	}
 
-	public Slice<WorkItem> getWorkItemsByStatus(WorkItem.Status workItemStatus, Pageable pageable) {
+	public List<WorkItem> getWorkItemsByStatus(WorkItem.Status workItemStatus, int page, int size) {
 		try {
-			return workItemRepository.findByStatus(workItemStatus, pageable);
+			return workItemRepository.findByStatus(workItemStatus, new PageRequest(page, size)).getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Could not get WorkItems with status " + workItemStatus, e);
 		}
 	}
 
-	public Slice<WorkItem> getWorkItemsByTeamId(Long teamId, Pageable pageable) {
+	public List<WorkItem> getWorkItemsByTeamId(Long teamId, int page, int size) {
 		try {
-			return workItemRepository.findByUserTeamId(teamId, pageable);
+			return workItemRepository.findByUserTeamId(teamId, new PageRequest(page, size)).getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Could not get WorkItem connected to Team id " + teamId, e);
 		}
 	}
 
-	public Slice<WorkItem> getWorkItemsByUserId(Long userId, Pageable pageable) {
+	public List<WorkItem> getWorkItemsByUserId(Long userId, int page, int size) {
 		try {
-			return workItemRepository.findByUserId(userId, pageable);
+			return workItemRepository.findByUserId(userId, new PageRequest(page, size)).getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Could not get WorkItem connected to User id " + userId, e);
 		}
 	}
 
-	public Slice<WorkItem> getWorkItemsWithIssue(Pageable pageable) {
+	public List<WorkItem> getWorkItemsWithIssue(int page, int size) {
 		try {
-			return workItemRepository.getWorkItemsWithIssue(pageable);
+			return workItemRepository.getWorkItemsWithIssue(new PageRequest(page, size)).getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Could not get WorkItems with Issues", e);
 		}
 	}
 
-	public Slice<WorkItem> getAllWorkItems(Pageable pageable) {
+	public List<WorkItem> getAllWorkItems(int page, int size) {
 
 		try {
-			return workItemRepository.findAll(pageable);
+			return workItemRepository.findAll(new PageRequest(page, size)).getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Couldnt get all workitems", e);
 		}
 	}
 
-	public Slice<WorkItem> getWorkItemsByPeriodAndStatus(WorkItem.Status status, Date start, Date end,
-			Pageable pageable) {
+	public List<WorkItem> getWorkItemsByPeriodAndStatus(WorkItem.Status status, Date start, Date end,
+			int page, int size) {
 		try {
-			return workItemRepository.getWorkItemsByStatusAndPeriod(status, start, end, pageable);
+			return workItemRepository.getWorkItemsByStatusAndPeriod(status, start, end, new PageRequest(page, size)).getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("", e);
 		}
@@ -458,9 +459,9 @@ public class CaseService {
 		}
 	}
 
-	public Slice<Issue> getAllIssues(Pageable pageable) {
+	public List<Issue> getAllIssues(int page, int size) {
 		try {
-			return issueRepository.findAll(pageable);
+			return issueRepository.findAll(new PageRequest(page, size)).getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Could not get issues");
 		}
@@ -522,10 +523,10 @@ public class CaseService {
 
 	private boolean workItemIsDone(Long workItemId) {
 		WorkItem workItem = workItemRepository.findOne(workItemId);
-		
+
 		if (workItem.getStatus().equals(WorkItem.Status.DONE)) {
 			return true;
-		}else{
+		} else {
 			throw new StatusConflictException("WorkItem status is not done");
 		}
 	}

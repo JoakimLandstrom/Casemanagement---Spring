@@ -11,5 +11,5 @@ import se.plushogskolan.casemanagement.model.Issue;
 public interface IssueRepository extends PagingAndSortingRepository<Issue, Long>{
 
 	@Query("SELECT i FROM #{#entityName} i WHERE i.workItem.id = :workItemId")
-    Slice<Issue> getIssuesByWorkItemId(@Param("workItemId")Long workItemId, Pageable pageable);    
+	Slice<Issue> getIssuesByWorkItemId(@Param("workItemId")Long workItemId, Pageable pageable);    
 }
