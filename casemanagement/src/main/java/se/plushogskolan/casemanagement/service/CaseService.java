@@ -48,7 +48,7 @@ public class CaseService {
 	// USER
 
 	public User save(User user) {
-		
+
 		if (isPersistedObject(user) && !userFillsRequirements(user)) {
 			throw new AlreadyPersistedException(String.format("User with id: %d already exists", user.getId()));
 		}
@@ -274,10 +274,10 @@ public class CaseService {
 				team.setActive(true);
 				return teamRepository.save(team);
 			} else {
-				throw new ServiceException("Team could not be activated");
+				throw new StatusConflictException("Team could not be activated");
 			}
 		} catch (DataAccessException e) {
-			throw new ServiceException("Team could not be activated");
+			throw new InternalErrorException("Team could not be activated");
 		}
 	}
 
@@ -285,7 +285,7 @@ public class CaseService {
 		try {
 			return teamRepository.findOne(teamId);
 		} catch (DataAccessException e) {
-			throw new ServiceException("Could not get team with id: " + teamId);
+			throw new InternalErrorException("Could not get team with id: " + teamId);
 		}
 	}
 
@@ -293,7 +293,7 @@ public class CaseService {
 		try {
 			return teamRepository.findByNameContaining(name, page);
 		} catch (DataAccessException e) {
-			throw new ServiceException("Could not get team with name: " + name);
+			throw new InternalErrorException("Could not get team with name: " + name);
 		}
 	}
 
@@ -301,7 +301,7 @@ public class CaseService {
 		try {
 			return teamRepository.findAll(pageable);
 		} catch (DataAccessException e) {
-			throw new ServiceException("Could not get teams");
+			throw new InternalErrorException("Could not get teams");
 		}
 	}
 
@@ -309,11 +309,11 @@ public class CaseService {
 
 	public WorkItem save(WorkItem workItem) {
 		if (isPersistedObject(workItem))
-			throw new ServiceException("WorkItem already exists");
+			throw new AlreadyPersistedException("WorkItem already exists");
 		try {
 			return workItemRepository.save(workItem);
 		} catch (DataAccessException e) {
-			throw new ServiceException("WorkItem could not be saved", e);
+			throw new InternalErrorException("WorkItem could not be saved", e);
 		}
 	}
 
@@ -324,10 +324,10 @@ public class CaseService {
 				workItem.setStatus(workItemStatus);
 				return workItemRepository.save(workItem);
 			} catch (DataAccessException e) {
-				throw new ServiceException("This WorkItem could not be updated", e);
+				throw new InternalErrorException("This WorkItem could not be updated", e);
 			}
 		} else
-			throw new ServiceException("This WorkItem does not exist");
+			throw new NotPersistedException("This WorkItem does not exist");
 	}
 
 	public void deleteWorkItem(Long workItemId) {
@@ -335,10 +335,10 @@ public class CaseService {
 			try {
 				workItemRepository.delete(workItemId);
 			} catch (DataAccessException e) {
-				throw new ServiceException("WorkItem could not be deleted", e);
+				throw new InternalErrorException("WorkItem could not be deleted", e);
 			}
 		} else
-			throw new ServiceException("This WorkItem does not exist");
+			throw new NotPersistedException("This WorkItem does not exist");
 	}
 
 	@Transactional
@@ -352,17 +352,17 @@ public class CaseService {
 				workItem.setUser(user);
 				return workItemRepository.save(workItem);
 			} catch (DataAccessException e) {
-				throw new ServiceException("Could not add WorkItem to User", e);
+				throw new InternalErrorException("Could not add WorkItem to User", e);
 			}
 		} else
-			throw new ServiceException("User is either inactive or has no space for additional WorkItems");
+			throw new StatusConflictException("User is inactive");
 	}
 
 	public Slice<WorkItem> searchWorkItemByDescription(String description, Pageable pageable) {
 		try {
 			return workItemRepository.findByDescriptionContaining(description, pageable);
 		} catch (DataAccessException e) {
-			throw new ServiceException("Could not find any WorkItem with description: " + description, e);
+			throw new InternalErrorException("Could not find any WorkItem with description: " + description, e);
 		}
 	}
 
@@ -370,7 +370,7 @@ public class CaseService {
 		try {
 			return workItemRepository.findByStatus(workItemStatus, pageable);
 		} catch (DataAccessException e) {
-			throw new ServiceException("Could not get WorkItems with status " + workItemStatus, e);
+			throw new InternalErrorException("Could not get WorkItems with status " + workItemStatus, e);
 		}
 	}
 
@@ -378,7 +378,7 @@ public class CaseService {
 		try {
 			return workItemRepository.findByUserTeamId(teamId, pageable);
 		} catch (DataAccessException e) {
-			throw new ServiceException("Could not get WorkItem connected to Team id " + teamId, e);
+			throw new InternalErrorException("Could not get WorkItem connected to Team id " + teamId, e);
 		}
 	}
 
@@ -386,7 +386,7 @@ public class CaseService {
 		try {
 			return workItemRepository.findByUserId(userId, pageable);
 		} catch (DataAccessException e) {
-			throw new ServiceException("Could not get WorkItem connected to User id " + userId, e);
+			throw new InternalErrorException("Could not get WorkItem connected to User id " + userId, e);
 		}
 	}
 
@@ -394,7 +394,7 @@ public class CaseService {
 		try {
 			return workItemRepository.getWorkItemsWithIssue(pageable);
 		} catch (DataAccessException e) {
-			throw new ServiceException("Could not get WorkItems with Issues", e);
+			throw new InternalErrorException("Could not get WorkItems with Issues", e);
 		}
 	}
 
@@ -403,7 +403,7 @@ public class CaseService {
 		try {
 			return workItemRepository.findAll(pageable);
 		} catch (DataAccessException e) {
-			throw new ServiceException("Couldnt get all workitems", e);
+			throw new InternalErrorException("Couldnt get all workitems", e);
 		}
 	}
 
@@ -412,7 +412,7 @@ public class CaseService {
 		try {
 			return workItemRepository.getWorkItemsByStatusAndPeriod(status, start, end, pageable);
 		} catch (DataAccessException e) {
-			throw new ServiceException("", e);
+			throw new InternalErrorException("", e);
 		}
 	}
 
@@ -429,10 +429,10 @@ public class CaseService {
 				workItemRepository.save(workItem);
 				return issue;
 			} catch (DataAccessException e) {
-				throw new ServiceException("Issue could not be saved");
+				throw new InternalErrorException("Issue could not be saved");
 			}
 		} else {
-			throw new ServiceException("WorkItem does not have status done or the Issue already exists");
+			throw new AlreadyPersistedException("Issue already exists");
 		}
 	}
 
@@ -443,10 +443,10 @@ public class CaseService {
 				issue.setDescription(description);
 				return issueRepository.save(issue);
 			} catch (DataAccessException e) {
-				throw new ServiceException("Issue could not be updated");
+				throw new InternalErrorException("Issue could not be updated");
 			}
 		} else {
-			throw new ServiceException("Could not change description of issue with id: " + issueId);
+			throw new NotPersistedException("Issue doesnt exist: " + issueId);
 		}
 	}
 
@@ -454,7 +454,7 @@ public class CaseService {
 		try {
 			return issueRepository.findOne(id);
 		} catch (DataAccessException e) {
-			throw new ServiceException("Could not get Issue with id: " + id);
+			throw new InternalErrorException("Could not get Issue with id: " + id);
 		}
 	}
 
@@ -462,7 +462,7 @@ public class CaseService {
 		try {
 			return issueRepository.findAll(pageable);
 		} catch (DataAccessException e) {
-			throw new ServiceException("Could not get issues");
+			throw new InternalErrorException("Could not get issues");
 		}
 	}
 
@@ -517,12 +517,17 @@ public class CaseService {
 		if (workItems.getNumberOfElements() < 5)
 			return true;
 		else
-			return false;
+			throw new NoSpaceException("User has no space for additional workitems");
 	}
 
 	private boolean workItemIsDone(Long workItemId) {
 		WorkItem workItem = workItemRepository.findOne(workItemId);
-		return WorkItem.Status.DONE.equals(workItem.getStatus());
+		
+		if (workItem.getStatus().equals(WorkItem.Status.DONE)) {
+			return true;
+		}else{
+			throw new StatusConflictException("WorkItem status is not done");
+		}
 	}
 
 	private boolean isPersistedObject(AbstractEntity entity) {
