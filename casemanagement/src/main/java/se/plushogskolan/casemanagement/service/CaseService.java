@@ -49,7 +49,7 @@ public class CaseService {
 
 	public User save(User user) {
 
-		if (isPersistedObject(user) && !userFillsRequirements(user)) {
+		if (!userFillsRequirements(user) || isPersistedObject(user)) {
 			throw new AlreadyPersistedException(String.format("User with id: %d already exists", user.getId()));
 		}
 
@@ -474,7 +474,9 @@ public class CaseService {
 		if (user.getTeam() != null && !teamHasSpaceForUser(user.getTeam().getId())) {
 			throw new NoSpaceException("Team has no space");
 		}
-		System.out.println(searchUsersByUsername(user.getUsername(), 0, 1).size());
+		if(searchUsersByUsername(user.getUsername(), 0, 1).size() != 0){
+			throw new AlreadyPersistedException("Username already exists");
+		}
 		return true;
 	}
 
