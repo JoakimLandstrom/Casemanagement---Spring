@@ -474,9 +474,7 @@ public class CaseService {
 		if (user.getTeam() != null && !teamHasSpaceForUser(user.getTeam().getId())) {
 			throw new NoSpaceException("Team has no space");
 		}
-		if(searchUsersByUsername(user.getUsername(), 0, 1).size() != 0){
-			throw new AlreadyPersistedException("Username already exists");
-		}
+		System.out.println(searchUsersByUsername(user.getUsername(), 0, 1).size());
 		return true;
 	}
 
