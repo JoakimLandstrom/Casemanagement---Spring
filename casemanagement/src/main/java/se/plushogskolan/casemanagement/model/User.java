@@ -14,7 +14,7 @@ public class User extends AbstractEntity {
 	@Column(unique = true)
 	private String username;
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.EAGER)
 	private Team team;
 
 	@OneToMany(mappedBy = "user", fetch=FetchType.EAGER)
