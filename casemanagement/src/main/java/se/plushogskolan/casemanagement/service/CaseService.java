@@ -100,6 +100,9 @@ public class CaseService {
 		if (!usernameLongEnough(username)) {
 			throw new IllegalArgumentException("Username not long enough!");
 		}
+		if(searchUsersByUsername(username, 0, 1).size() != 0){
+			throw new AlreadyPersistedException("Username already exists");
+		}
 
 		if (userRepository.exists(userId)) {
 			try {
