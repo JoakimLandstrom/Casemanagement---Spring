@@ -1,6 +1,6 @@
 package se.plushogskolan.casemanagement.service;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -163,10 +163,14 @@ public class CaseService {
 
 	public User getUser(Long userId) {
 
-		if (userRepository.exists(userId)) {
-			return userRepository.findOne(userId);
-		} else {
-			throw new NotPersistedException("User does not exists :" + userId);
+		try {
+			if (userRepository.exists(userId)) {
+				return userRepository.findOne(userId);
+			} else {
+				throw new NotPersistedException("User does not exists :" + userId);
+			}
+		} catch (DataAccessException e) {
+			throw new InternalErrorException("Could not get user");
 		}
 
 	}
@@ -297,7 +301,11 @@ public class CaseService {
 
 	public Team getTeam(Long teamId) {
 		try {
-			return teamRepository.findOne(teamId);
+			if (teamRepository.exists(teamId)) {
+				return teamRepository.findOne(teamId);
+			} else {
+				throw new NotPersistedException("Team does not exist");
+			}
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Could not get team with id: " + teamId);
 		}
@@ -332,11 +340,14 @@ public class CaseService {
 	}
 
 	public WorkItem getWorkItemById(Long id) {
-
-		if (workItemRepository.exists(id)) {
-			return workItemRepository.findOne(id);
-		} else {
-			throw new NotPersistedException("WorkItem does not exists : " + id);
+		try {
+			if (workItemRepository.exists(id)) {
+				return workItemRepository.findOne(id);
+			} else {
+				throw new NotPersistedException("WorkItem does not exists : " + id);
+			}
+		} catch (DataAccessException e) {
+			throw new InternalErrorException("Could not get workitem");
 		}
 	}
 
@@ -431,8 +442,9 @@ public class CaseService {
 		}
 	}
 
-	public List<WorkItem> getWorkItemsByPeriodAndStatus(WorkItem.Status status, Date start, Date end, int page,
+	public List<WorkItem> getWorkItemsByPeriodAndStatus(WorkItem.Status status, LocalDate start, LocalDate end, int page,
 			int size) {
+		
 		try {
 			return workItemRepository.getWorkItemsByStatusAndPeriod(status, start, end, new PageRequest(page, size))
 					.getContent();
@@ -476,8 +488,14 @@ public class CaseService {
 	}
 
 	public Issue getIssue(Long id) {
+
 		try {
-			return issueRepository.findOne(id);
+			if (issueRepository.exists(id)) {
+				return issueRepository.findOne(id);
+			} else {
+				throw new NotPersistedException("Issue does not exist");
+			}
+
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Could not get Issue with id: " + id);
 		}

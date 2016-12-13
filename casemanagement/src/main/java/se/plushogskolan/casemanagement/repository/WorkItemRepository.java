@@ -1,6 +1,6 @@
 package se.plushogskolan.casemanagement.repository;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -24,7 +24,7 @@ public interface WorkItemRepository extends PagingAndSortingRepository<WorkItem,
 	Slice<WorkItem> getWorkItemsWithIssue(Pageable pageable);
 
 	@Query("SELECT wi FROM #{#entityName} wi WHERE wi.status = :status AND wi.lastModifiedDate BETWEEN :startDate AND :endDate")
-	Slice<WorkItem> getWorkItemsByStatusAndPeriod(@Param("status") WorkItem.Status status, @Param("startDate") Date startDate, @Param("endDate") Date endDate,
+	Slice<WorkItem> getWorkItemsByStatusAndPeriod(@Param("status") WorkItem.Status status, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate,
 			Pageable pageable);
 
 }
