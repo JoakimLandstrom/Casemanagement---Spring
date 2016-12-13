@@ -331,6 +331,15 @@ public class CaseService {
 		}
 	}
 
+	public WorkItem getWorkItemById(Long id) {
+
+		if (workItemRepository.exists(id)) {
+			return workItemRepository.findOne(id);
+		} else {
+			throw new NotPersistedException("WorkItem does not exists : " + id);
+		}
+	}
+
 	public WorkItem updateStatusById(Long workItemId, WorkItem.Status workItemStatus) {
 		if (workItemRepository.exists(workItemId)) {
 			try {
