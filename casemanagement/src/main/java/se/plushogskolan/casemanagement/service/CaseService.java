@@ -100,7 +100,7 @@ public class CaseService {
 		if (!usernameLongEnough(username)) {
 			throw new IllegalArgumentException("Username not long enough!");
 		}
-		if(searchUsersByUsername(username, 0, 1).size() != 0){
+		if (searchUsersByUsername(username, 0, 1).size() != 0) {
 			throw new AlreadyPersistedException("Username already exists");
 		}
 
@@ -192,6 +192,16 @@ public class CaseService {
 		try {
 			return userRepository.findByUsernameContaining(username, new PageRequest(page, size)).getContent();
 		} catch (DataAccessException e) {
+			throw new InternalErrorException("Could not search users", e);
+		}
+	}
+
+	public List<User> searchUsersByFirstNameLastNameUsername(String firstName, String lastName, String username,
+			int page, int size) {
+		try {
+			return userRepository.findUsersBy(firstName, lastName, username, new PageRequest(page, size)).getContent();
+		} catch (DataAccessException e) {
+			e.printStackTrace();
 			throw new InternalErrorException("Could not search users", e);
 		}
 	}
@@ -364,7 +374,8 @@ public class CaseService {
 
 	public List<WorkItem> searchWorkItemByDescription(String description, int page, int size) {
 		try {
-			return workItemRepository.findByDescriptionContaining(description, new PageRequest(page, size)).getContent();
+			return workItemRepository.findByDescriptionContaining(description, new PageRequest(page, size))
+					.getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("Could not find any WorkItem with description: " + description, e);
 		}
@@ -411,10 +422,11 @@ public class CaseService {
 		}
 	}
 
-	public List<WorkItem> getWorkItemsByPeriodAndStatus(WorkItem.Status status, Date start, Date end,
-			int page, int size) {
+	public List<WorkItem> getWorkItemsByPeriodAndStatus(WorkItem.Status status, Date start, Date end, int page,
+			int size) {
 		try {
-			return workItemRepository.getWorkItemsByStatusAndPeriod(status, start, end, new PageRequest(page, size)).getContent();
+			return workItemRepository.getWorkItemsByStatusAndPeriod(status, start, end, new PageRequest(page, size))
+					.getContent();
 		} catch (DataAccessException e) {
 			throw new InternalErrorException("", e);
 		}
@@ -477,7 +489,7 @@ public class CaseService {
 		if (user.getTeam() != null && !teamHasSpaceForUser(user.getTeam().getId())) {
 			throw new NoSpaceException("Team has no space");
 		}
-		if(searchUsersByUsername(user.getUsername(), 0, 1).size() != 0){
+		if (searchUsersByUsername(user.getUsername(), 0, 1).size() != 0) {
 			throw new AlreadyPersistedException("Username already exists");
 		}
 		return true;

@@ -4,7 +4,6 @@ import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -14,10 +13,10 @@ public class User extends AbstractEntity {
 	@Column(unique = true)
 	private String username;
 
-	@ManyToOne(fetch=FetchType.EAGER)
+	@ManyToOne
 	private Team team;
 
-	@OneToMany(mappedBy = "user", fetch=FetchType.EAGER)
+	@OneToMany(mappedBy = "user")
 	private Collection<WorkItem> workItems;
 
 	private boolean isActive = true;
