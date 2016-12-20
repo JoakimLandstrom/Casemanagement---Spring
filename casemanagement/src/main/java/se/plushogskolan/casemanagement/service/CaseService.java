@@ -379,6 +379,9 @@ public class CaseService {
 	public WorkItem addWorkItemToUser(Long workItemId, Long userId) {
 		// PageRequest(0, 5) because if page 0 has 5 entries the method will
 
+		if(!workItemRepository.exists(workItemId) || !userRepository.exists(userId))
+			throw new NotPersistedException("Entity not persisted");
+		
 		if (userIsActive(userId) && userHasSpaceForAdditionalWorkItem(workItemId, userId, new PageRequest(0, 5))) {
 			try {
 				WorkItem workItem = workItemRepository.findOne(workItemId);
