@@ -62,6 +62,7 @@ public class InfrastructureConfig {
 		factory.setDataSource(dataSource());
 		factory.setJpaVendorAdapter(jpaVendorAdapter());
 		factory.setPackagesToScan("se.plushogskolan.casemanagement.model");
+		factory.setPackagesToScan("se.plushogskolan.restcaseservice.model");
 
 		return factory;
 	}
