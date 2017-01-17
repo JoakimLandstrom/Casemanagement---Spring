@@ -23,7 +23,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import se.plushogskolan.casemanagement.auditing.CustomAuditorAware;
 
 @Configuration
-@EnableJpaRepositories("se.plushogskolan.casemanagement.repository")
+@EnableJpaRepositories({"se.plushogskolan.casemanagement.repository", "se.plushogskolan.restcaseservice.repository"})
 @EnableJpaAuditing
 @EnableTransactionManagement
 public class InfrastructureConfig {
@@ -61,9 +61,8 @@ public class InfrastructureConfig {
 		LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
 		factory.setDataSource(dataSource());
 		factory.setJpaVendorAdapter(jpaVendorAdapter());
-		factory.setPackagesToScan("se.plushogskolan.casemanagement.model");
-		factory.setPackagesToScan("se.plushogskolan.restcaseservice.model");
-
+		factory.setPackagesToScan("se.plushogskolan.casemanagement.model", "se.plushogskolan.restcaseservice.model");
+		
 		return factory;
 	}
 
